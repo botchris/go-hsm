@@ -12,7 +12,7 @@ import (
 func TestTakeSnapshot(t *testing.T) {
 	machine, err := prepareNilMachine(nil)
 
-	//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+	//println(string(hsm.NewPlantUMLPrinter[interface{}]().Print(machine)))
 
 	require.NoError(t, err)
 	require.NotNil(t, machine)
@@ -24,7 +24,7 @@ func TestTakeSnapshot(t *testing.T) {
 	assert.Equal(t, snapshot.SignalsHistory, []string{"*nSignal"})
 	assert.Equal(t, snapshot.StatesHistory, []string{"n1", "n2"})
 	assert.False(t, machine.Failed())
-	assert.NotEmpty(t, hsm.NewPlantUMLPrinter().Print(machine))
+	assert.NotEmpty(t, hsm.NewPlantUMLPrinter[interface{}]().Print(machine))
 }
 
 // NOTE: this tests uses nil-context-machine example definition
@@ -36,12 +36,12 @@ func TestRestoreFromSnapshot(t *testing.T) {
 		StatesHistory:  []string{},
 	}
 
-	machine, err := hsm.NewBuilder().
+	machine, err := hsm.NewBuilder[interface{}]().
 		// meta
 		WithName("nil").
 		WithContext(nil).
 		StartingAt(n1).
-		WithErrorState(hsm.NewErrorState().WithID("error").Build()).
+		WithErrorState(hsm.NewErrorState[interface{}]().WithID("error").Build()).
 
 		// states
 		AddState(n1).

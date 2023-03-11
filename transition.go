@@ -5,25 +5,25 @@ const (
 	transitionKindInternal
 )
 
-// transitionKind private definition of transition types
+// transitionKind private definition of transition types.
 type transitionKind int
 
-// Transition represents a transition between two states within a HSM
-type Transition struct {
+// Transition represents a transition between two states within a HSM.
+type Transition[C any] struct {
 	kind         transitionKind
 	signal       Signal
-	guard        *Guard
-	effect       *Effect
+	guard        *Guard[C]
+	effect       *Effect[C]
 	nextStateID  string
-	nextStatePtr *Vertex
+	nextStatePtr *Vertex[C]
 }
 
-// NewTransition returns a new transition builder
-func NewTransition() TransitionBuilder {
-	return &transitionBuilder{}
+// NewTransition returns a new transition builder.
+func NewTransition[C any]() TransitionBuilder[C] {
+	return &transitionBuilder[C]{}
 }
 
 // NewInternalTransition returns a new internal transition builder.
-func NewInternalTransition() InternalTransitionBuilder {
-	return &internalTransitionBuilder{}
+func NewInternalTransition[C any]() InternalTransitionBuilder[C] {
+	return &internalTransitionBuilder[C]{}
 }

@@ -4,60 +4,60 @@ import (
 	"fmt"
 )
 
-// Builder defines a builder pattern for creating new FSMs
-type Builder struct {
-	hsm   *HSM
-	start *Vertex
+// Builder defines a builder pattern for creating new FSMs.
+type Builder[C any] struct {
+	hsm   *HSM[C]
+	start *Vertex[C]
 }
 
-// NewBuilder returns a new builder instance
-func NewBuilder() *Builder {
-	builder := &Builder{
-		hsm: &HSM{
+// NewBuilder returns a new builder instance.
+func NewBuilder[C any]() *Builder[C] {
+	builder := &Builder[C]{
+		hsm: &HSM[C]{
 			signalsHistory: make([]string, 0),
 			statesHistory:  make([]string, 0),
-			states:         make(map[string]*Vertex),
+			states:         make(map[string]*Vertex[C]),
 		},
 	}
 
 	return builder
 }
 
-// WithName defines a name for this HSM instance, used for visual representations
-func (b *Builder) WithName(name string) *Builder {
+// WithName defines a name for this HSM instance, used for visual representations.
+func (b *Builder[C]) WithName(name string) *Builder[C] {
 	b.hsm.name = name
 
 	return b
 }
 
-// WithErrorState registers an error state
-func (b *Builder) WithErrorState(state *Vertex) *Builder {
+// WithErrorState registers an error state.
+func (b *Builder[C]) WithErrorState(state *Vertex[C]) *Builder[C] {
 	b.hsm.errorState = state
 
 	return b
 }
 
-// WithContext sets HSM`s context
-func (b *Builder) WithContext(ctx interface{}) *Builder {
+// WithContext sets HSM`s context.
+func (b *Builder[C]) WithContext(ctx C) *Builder[C] {
 	b.hsm.context = ctx
 
 	return b
 }
 
-// StartingAt sets HSM`s starting state
-func (b *Builder) StartingAt(state *Vertex) *Builder {
+// StartingAt sets HSM`s starting state.
+func (b *Builder[C]) StartingAt(state *Vertex[C]) *Builder[C] {
 	b.start = state
 
 	return b
 }
 
-// AddState registers a single state into this machine
-func (b *Builder) AddState(state *Vertex) *Builder {
+// AddState registers a single state into this machine.
+func (b *Builder[C]) AddState(state *Vertex[C]) *Builder[C] {
 	return b.AddStates(state)
 }
 
-// AddStates registers multiple states at once
-func (b *Builder) AddStates(states ...*Vertex) *Builder {
+// AddStates registers multiple states at once.
+func (b *Builder[C]) AddStates(states ...*Vertex[C]) *Builder[C] {
 	for _, s := range states {
 		b.hsm.states[s.id] = s
 	}
@@ -67,7 +67,7 @@ func (b *Builder) AddStates(states ...*Vertex) *Builder {
 
 // Restore builds a new machine instance and restores from the given snapshot.
 // no guards are checked nor entry/exit logic will be executed.
-func (b *Builder) Restore(snapshot Snapshot) (*HSM, error) {
+func (b *Builder[C]) Restore(snapshot Snapshot) (*HSM[C], error) {
 	machine, err := b.Build()
 	if err != nil {
 		return nil, err
@@ -89,8 +89,8 @@ func (b *Builder) Restore(snapshot Snapshot) (*HSM, error) {
 	return machine, nil
 }
 
-// Build builds the HSM
-func (b *Builder) Build() (*HSM, error) {
+// Build builds the HSM.
+func (b *Builder[C]) Build() (*HSM[C], error) {
 	if b.hsm.name == "" {
 		return nil, fmt.Errorf("no name was provided fot his HSM")
 	}
@@ -109,7 +109,7 @@ func (b *Builder) Build() (*HSM, error) {
 
 	// compute state transitions
 	for _, s := range b.hsm.states {
-		var transitions []*Transition
+		var transitions []*Transition[C]
 		transitions = append(transitions, s.edges.list()...)
 
 		if s.entryState != nil && s.entryState.edges.size() > 0 {
@@ -139,8 +139,9 @@ func (b *Builder) Build() (*HSM, error) {
 }
 
 // validate ensures the integrity of the given vertex and all its parts
+//
 //nolint:gocyclo
-func (b *Builder) validateVertex(v *Vertex) error {
+func (b *Builder[C]) validateVertex(v *Vertex[C]) error {
 	if v.id == "" {
 		return fmt.Errorf("invalid state identity, cannot be empty")
 	}

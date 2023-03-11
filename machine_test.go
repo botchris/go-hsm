@@ -16,17 +16,15 @@ func TestHSM_Mutex(t *testing.T) {
 
 	ctx.hsm = machine
 	require.NoError(t, machine.Signal(&tSignal{}))
-
-	//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
 }
 
-func prepareMutexMachine(context interface{}) (*hsm.HSM, error) {
-	return hsm.NewBuilder().
+func prepareMutexMachine(context *mutexContext) (*hsm.HSM[*mutexContext], error) {
+	return hsm.NewBuilder[*mutexContext]().
 		// meta
 		WithName("mutex").
 		WithContext(context).
 		StartingAt(aState).
-		WithErrorState(hsm.NewErrorState().WithID("error").Build()).
+		WithErrorState(hsm.NewErrorState[*mutexContext]().WithID("error").Build()).
 
 		// states
 		AddState(aState).
@@ -36,44 +34,43 @@ func prepareMutexMachine(context interface{}) (*hsm.HSM, error) {
 		Build()
 }
 
-// SIGNALS & CONTEXT
+// SIGNALS & CONTEXT.
 type (
 	tSignal      struct{}
 	mutexContext struct {
-		hsm *hsm.HSM
+		hsm *hsm.HSM[*mutexContext]
 	}
 )
 
-// STATE IDS
+// STATE IDS.
 var (
 	aID = "A"
 	bID = "B"
 )
 
-// MACHINE PARTS
-var aState = hsm.NewState().
+// MACHINE PARTS.
+var aState = hsm.NewState[*mutexContext]().
 	WithID(aID).
 	AddTransitions(
 		// open -handle-> closed
-		hsm.NewTransition().
+		hsm.NewTransition[*mutexContext]().
 			When(&tSignal{}).
 			GoTo(bID).
 			Build(),
 	).
 	Build()
 
-var bState = hsm.NewState().
+var bState = hsm.NewState[*mutexContext]().
 	WithID(bID).
 	OnEntry(
-		hsm.NewAction().
+		hsm.NewAction[*mutexContext]().
 			WithLabel("read(hsm.currentState)").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				mutexContext := ctx.(*mutexContext)
-				mutexContext.hsm.Current()
-				mutexContext.hsm.At(aState)
-				mutexContext.hsm.Finished()
-				mutexContext.hsm.Failed()
-				mutexContext.hsm.Can(&tSignal{})
+			WithMethod(func(ctx *mutexContext, signal hsm.Signal) error {
+				ctx.hsm.Current()
+				ctx.hsm.At(aState)
+				ctx.hsm.Finished()
+				ctx.hsm.Failed()
+				ctx.hsm.Can(&tSignal{})
 
 				return nil
 			}).

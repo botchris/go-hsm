@@ -14,7 +14,7 @@ func TestInvocationOrder(t *testing.T) {
 	context := &orderContext{}
 	machine, err := prepareOrderMachine(context)
 
-	//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+	//println(string(hsm.NewPlantUMLPrinter[*orderContext]().Print(machine)))
 
 	require.NoError(t, err)
 	require.NotNil(t, machine)
@@ -26,18 +26,18 @@ func TestInvocationOrder(t *testing.T) {
 	sequence := strings.Join(context.calls, "; ") + ";"
 	assert.Equal(t, "a(); b(); t(); c(); d(); e();", sequence)
 	assert.False(t, machine.Failed())
-	assert.NotEmpty(t, hsm.NewPlantUMLPrinter().Print(machine))
+	assert.NotEmpty(t, hsm.NewPlantUMLPrinter[*orderContext]().Print(machine))
 	assert.True(t, machine.At(s21))
 	assert.True(t, machine.Can(&wSignal{}))
 }
 
-func prepareOrderMachine(context interface{}) (*hsm.HSM, error) {
-	return hsm.NewBuilder().
+func prepareOrderMachine(context *orderContext) (*hsm.HSM[*orderContext], error) {
+	return hsm.NewBuilder[*orderContext]().
 		// meta
 		WithName("order").
 		WithContext(context).
 		StartingAt(s11).
-		WithErrorState(hsm.NewErrorState().WithID("error").Build()).
+		WithErrorState(hsm.NewErrorState[*orderContext]().WithID("error").Build()).
 
 		// states
 		AddState(w).
@@ -59,43 +59,44 @@ type (
 	}
 )
 
-var w = hsm.NewState().
+var w = hsm.NewState[*orderContext]().
 	WithID("w").
 	Build()
 
-var s = hsm.NewState().
+var s = hsm.NewState[*orderContext]().
 	WithID("s").
 	OnExit(
-		hsm.NewAction().
+		hsm.NewAction[*orderContext]().
 			WithLabel("f()").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				ctx.(*orderContext).calls = append(ctx.(*orderContext).calls, "f()")
+			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+				ctx.calls = append(ctx.calls, "f()")
+
 				return nil
 			}).
 			Build(),
 	).
 	AddTransitions(
-		hsm.NewTransition().
+		hsm.NewTransition[*orderContext]().
 			When(&wSignal{}).
 			GoTo("w").
 			Build(),
 	).
 	Build()
 
-var s1 = hsm.NewState().
+var s1 = hsm.NewState[*orderContext]().
 	WithID("s1").
 	ParentOf(s).
 	OnExit(
-		hsm.NewAction().
+		hsm.NewAction[*orderContext]().
 			WithLabel("b()").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				ctx.(*orderContext).calls = append(ctx.(*orderContext).calls, "b()")
+			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+				ctx.calls = append(ctx.calls, "b()")
 				return nil
 			}).
 			Build(),
 	).
 	AddTransitions(
-		hsm.NewTransition().
+		hsm.NewTransition[*orderContext]().
 			When(&tSignal{}).
 			GuardedBy(gGuard).
 			ApplyEffect(tEffect).
@@ -104,78 +105,83 @@ var s1 = hsm.NewState().
 	).
 	Build()
 
-var s11 = hsm.NewState().
+var s11 = hsm.NewState[*orderContext]().
 	WithID("s11").
 	ParentOf(s1).
 	OnExit(
-		hsm.NewAction().
+		hsm.NewAction[*orderContext]().
 			WithLabel("a()").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				ctx.(*orderContext).calls = append(ctx.(*orderContext).calls, "a()")
+			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+				ctx.calls = append(ctx.calls, "a()")
+
 				return nil
 			}).
 			Build(),
 	).
 	Build()
 
-var s2 = hsm.NewState().
+var s2 = hsm.NewState[*orderContext]().
 	WithID("s2").
 	ParentOf(s).
 	WithEntryState(s2Entry).
 	OnEntry(
-		hsm.NewAction().
+		hsm.NewAction[*orderContext]().
 			WithLabel("c()").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				ctx.(*orderContext).calls = append(ctx.(*orderContext).calls, "c()")
+			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+				ctx.calls = append(ctx.calls, "c()")
+
 				return nil
 			}).
 			Build(),
 	).
 	Build()
 
-var s2Entry = hsm.NewEntryState().
+var s2Entry = hsm.NewEntryState[*orderContext]().
 	WithID("s2 entry").
 	AddTransitions(
-		hsm.NewTransition().
+		hsm.NewTransition[*orderContext]().
 			ApplyEffect(dEffect).
 			GoTo("s21").
 			Build(),
 	).
 	Build()
 
-var s21 = hsm.NewState().
+var s21 = hsm.NewState[*orderContext]().
 	WithID("s21").
 	ParentOf(s2).
 	OnEntry(
-		hsm.NewAction().
+		hsm.NewAction[*orderContext]().
 			WithLabel("e()").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				ctx.(*orderContext).calls = append(ctx.(*orderContext).calls, "e()")
+			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+				ctx.calls = append(ctx.calls, "e()")
+
 				return nil
 			}).
 			Build(),
 	).
 	Build()
 
-var tEffect = hsm.NewEffect().
+var tEffect = hsm.NewEffect[*orderContext]().
 	WithLabel("t()").
-	WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-		ctx.(*orderContext).calls = append(ctx.(*orderContext).calls, "t()")
+	WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+		ctx.calls = append(ctx.calls, "t()")
+
 		return nil
 	}).
 	Build()
 
-var dEffect = hsm.NewEffect().
+var dEffect = hsm.NewEffect[*orderContext]().
 	WithLabel("d()").
-	WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-		ctx.(*orderContext).calls = append(ctx.(*orderContext).calls, "d()")
+	WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+		ctx.calls = append(ctx.calls, "d()")
+
 		return nil
 	}).
 	Build()
 
-var gGuard = hsm.NewGuard().
+var gGuard = hsm.NewGuard[*orderContext]().
 	WithLabel("g()").
-	WithMethod(func(ctx interface{}) bool {
+	WithMethod(func(ctx *orderContext) bool {
 		return true
 	}).
 	Build()

@@ -14,7 +14,7 @@ func TestDoor(t *testing.T) {
 		context := &doorContext{}
 		machine, err := prepareDoorMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*doorContext]().Print(machine)))
 
 		require.NoError(t, err)
 		require.True(t, machine.Can(&handleSignal{}))
@@ -31,30 +31,30 @@ func TestDoor(t *testing.T) {
 
 		assert.Equal(t, 1, context.closedCounter)
 		assert.False(t, machine.Failed())
-		assert.NotEmpty(t, hsm.NewPlantUMLPrinter().Print(machine))
+		assert.NotEmpty(t, hsm.NewPlantUMLPrinter[*doorContext]().Print(machine))
 	})
 
 	t.Run("WHEN door is opened THEN cannot be locked using keys", func(t *testing.T) {
 		context := &doorContext{}
 		machine, err := prepareDoorMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*doorContext]().Print(machine)))
 
 		require.NoError(t, err)
 		assert.Error(t, machine.Signal(&keysSignal{}))
 		assert.Empty(t, context.logs)
 		assert.False(t, machine.Failed())
-		assert.NotEmpty(t, hsm.NewPlantUMLPrinter().Print(machine))
+		assert.NotEmpty(t, hsm.NewPlantUMLPrinter[*doorContext]().Print(machine))
 	})
 }
 
-func prepareDoorMachine(context interface{}) (*hsm.HSM, error) {
-	return hsm.NewBuilder().
+func prepareDoorMachine(context *doorContext) (*hsm.HSM[*doorContext], error) {
+	return hsm.NewBuilder[*doorContext]().
 		// meta
 		WithName("door").
 		WithContext(context).
 		StartingAt(openState).
-		WithErrorState(hsm.NewErrorState().WithID("error").Build()).
+		WithErrorState(hsm.NewErrorState[*doorContext]().WithID("error").Build()).
 
 		// states
 		AddState(openState).
@@ -83,105 +83,107 @@ var (
 )
 
 // MACHINE PARTS
-var openState = hsm.NewState().
+var openState = hsm.NewState[*doorContext]().
 	WithID(openID).
 	OnEntry(
-		hsm.NewAction().
+		hsm.NewAction[*doorContext]().
 			WithLabel("log(entering open)").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				context := ctx.(*doorContext)
-				context.logs = append(context.logs, fmt.Sprintf("entering OPEN state"))
+			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+				ctx.logs = append(ctx.logs, fmt.Sprintf("entering OPEN state"))
 
 				return nil
 			}).
 			Build()).
 	OnExit(
-		hsm.NewAction().
+		hsm.NewAction[*doorContext]().
 			WithLabel("log(exiting open)").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				context := ctx.(*doorContext)
-				context.logs = append(context.logs, fmt.Sprint("exiting OPEN state"))
+			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+				ctx.logs = append(ctx.logs, fmt.Sprint("exiting OPEN state"))
 
 				return nil
 			}).
 			Build()).
 	AddTransitions(
 		// open -handle-> closed
-		hsm.NewTransition().
+		hsm.NewTransition[*doorContext]().
 			When(&handleSignal{}).
 			ApplyEffect(countClosedEffect).
 			GoTo(closedID).
-			Build()).
+			Build(),
+	).
 	Build()
 
-var closedState = hsm.NewState().
+var closedState = hsm.NewState[*doorContext]().
 	WithID(closedID).
 	OnEntry(
-		hsm.NewAction().
+		hsm.NewAction[*doorContext]().
 			WithLabel("log(entering close)").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				context := ctx.(*doorContext)
-				context.logs = append(context.logs, fmt.Sprint("entering CLOSED state"))
+			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+				ctx.logs = append(ctx.logs, fmt.Sprint("entering CLOSED state"))
 
 				return nil
 			}).
-			Build()).
+			Build(),
+	).
 	OnExit(
-		hsm.NewAction().
+		hsm.NewAction[*doorContext]().
 			WithLabel("log(exiting close)").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				context := ctx.(*doorContext)
-				context.logs = append(context.logs, fmt.Sprint("exiting CLOSED state"))
+			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+				ctx.logs = append(ctx.logs, fmt.Sprint("exiting CLOSED state"))
 
 				return nil
 			}).
-			Build()).
+			Build(),
+	).
 	AddTransitions(
 		// closed -handle-> open
-		hsm.NewTransition().
+		hsm.NewTransition[*doorContext]().
 			When(&handleSignal{}).
 			GoTo(openID).
 			Build(),
 		// closed -keys-> locked
-		hsm.NewTransition().
+		hsm.NewTransition[*doorContext]().
 			When(&keysSignal{}).
 			GoTo(lockedID).
-			Build()).
+			Build(),
+	).
 	Build()
 
-var lockedState = hsm.NewState().
+var lockedState = hsm.NewState[*doorContext]().
 	WithID(lockedID).
-	OnEntry(hsm.NewAction().
+	OnEntry(hsm.NewAction[*doorContext]().
 		WithLabel("log(entering locked)").
-		WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-			context := ctx.(*doorContext)
-			context.logs = append(context.logs, fmt.Sprint("entering LOCKED state"))
+		WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+			ctx.logs = append(ctx.logs, fmt.Sprint("entering LOCKED state"))
 
 			return nil
 		}).
-		Build()).
+		Build(),
+	).
 	OnExit(
-		hsm.NewAction().
+		hsm.NewAction[*doorContext]().
 			WithLabel("log(exiting locked)").
-			WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-				context := ctx.(*doorContext)
-				context.logs = append(context.logs, fmt.Sprint("exiting LOCKED state"))
+			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+				ctx.logs = append(ctx.logs, fmt.Sprint("exiting LOCKED state"))
 
 				return nil
 			}).
-			Build()).
+			Build(),
+	).
 	AddTransitions(
 		// locked -handle-> closed
-		hsm.NewTransition().
+		hsm.NewTransition[*doorContext]().
 			When(&keysSignal{}).
 			GoTo(closedID).
-			Build()).
+			Build(),
+	).
 	Build()
 
-var countClosedEffect = hsm.NewEffect().
+var countClosedEffect = hsm.NewEffect[*doorContext]().
 	WithLabel("closed++").
-	WithMethod(func(ctx interface{}, trigger hsm.Signal) error {
-		ctx.(*doorContext).closedCounter++
+	WithMethod(func(ctx *doorContext, trigger hsm.Signal) error {
+		ctx.closedCounter++
+
 		return nil
 	}).
 	Build()

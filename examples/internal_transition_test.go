@@ -12,7 +12,7 @@ func TestInternalTransition(t *testing.T) {
 	context := &dummyCtx{}
 	machine, err := prepareDummyMachine(context)
 
-	//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+	//println(string(hsm.NewPlantUMLPrinter[*dummyCtx]().Print(machine)))
 
 	require.NoError(t, err)
 	require.NotNil(t, machine)
@@ -24,16 +24,16 @@ func TestInternalTransition(t *testing.T) {
 	assert.NoError(t, machine.Signal(&dummySignalTwo{}))
 	assert.True(t, machine.At(dummyStateTwo))
 	assert.Equal(t, 1, context.fxCount)
-	assert.NotEmpty(t, hsm.NewPlantUMLPrinter().Print(machine))
+	assert.NotEmpty(t, hsm.NewPlantUMLPrinter[*dummyCtx]().Print(machine))
 }
 
-func prepareDummyMachine(context interface{}) (*hsm.HSM, error) {
-	return hsm.NewBuilder().
+func prepareDummyMachine(context *dummyCtx) (*hsm.HSM[*dummyCtx], error) {
+	return hsm.NewBuilder[*dummyCtx]().
 		// meta
 		WithName("dummy").
 		WithContext(context).
 		StartingAt(dummyStateOne).
-		WithErrorState(hsm.NewErrorState().WithID("error").Build()).
+		WithErrorState(hsm.NewErrorState[*dummyCtx]().WithID("error").Build()).
 
 		// states
 		AddState(dummyStateOne).
@@ -53,16 +53,16 @@ type (
 )
 
 // MACHINE PARTS
-var dummyStateOne = hsm.NewState().
+var dummyStateOne = hsm.NewState[*dummyCtx]().
 	WithID("dummy1").
 	AddTransitions(
-		hsm.NewInternalTransition().
+		hsm.NewInternalTransition[*dummyCtx]().
 			When(&dummySignalOne{}).
 			ApplyEffect(
-				hsm.NewEffect().
+				hsm.NewEffect[*dummyCtx]().
 					WithLabel("dummy()").
-					WithMethod(func(ctx interface{}, signal hsm.Signal) error {
-						ctx.(*dummyCtx).fxCount++
+					WithMethod(func(ctx *dummyCtx, signal hsm.Signal) error {
+						ctx.fxCount++
 
 						return nil
 					}).
@@ -71,13 +71,13 @@ var dummyStateOne = hsm.NewState().
 			Build(),
 	).
 	AddTransitions(
-		hsm.NewTransition().
+		hsm.NewTransition[*dummyCtx]().
 			When(&dummySignalTwo{}).
 			GoTo("dummy2").
 			Build(),
 	).
 	Build()
 
-var dummyStateTwo = hsm.NewState().
+var dummyStateTwo = hsm.NewState[*dummyCtx]().
 	WithID("dummy2").
 	Build()
