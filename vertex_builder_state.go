@@ -7,7 +7,7 @@ type StateVertexBuilder[C any] interface {
 	WithEntryState(entry *Vertex[C]) StateVertexBuilder[C]
 	OnEntry(action *Action[C]) StateVertexBuilder[C]
 	OnExit(action *Action[C]) StateVertexBuilder[C]
-	AddTransitions(transitions ...*Transition[C]) StateVertexBuilder[C]
+	WithTransitions(transitions ...*Transition[C]) StateVertexBuilder[C]
 	Build() *Vertex[C]
 }
 
@@ -56,8 +56,8 @@ func (b *stateVertexBuilder[C]) OnExit(action *Action[C]) StateVertexBuilder[C] 
 	return b
 }
 
-// AddTransitions registers the given transitions starting from this vertex.
-func (b *stateVertexBuilder[C]) AddTransitions(transitions ...*Transition[C]) StateVertexBuilder[C] {
+// WithTransitions registers the given transitions starting from this vertex.
+func (b *stateVertexBuilder[C]) WithTransitions(transitions ...*Transition[C]) StateVertexBuilder[C] {
 	for _, t := range transitions {
 		b.edges.add(t)
 	}

@@ -143,7 +143,7 @@ var c0 = hsm.NewStart[*choiceCtx]().
 
 var c1 = hsm.NewState[*choiceCtx]().
 	WithID(c1ID).
-	AddTransitions(
+	WithTransitions(
 		// c1 -choiceSignal-> c2
 		hsm.NewTransition[*choiceCtx]().
 			When(&choiceSignal{}).

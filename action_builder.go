@@ -3,7 +3,7 @@ package hsm
 // ActionBuilder provides builder pattern interface for creating new action methods.
 type ActionBuilder[C any] interface {
 	WithLabel(label string) ActionBuilder[C]
-	WithMethod(method ActionFunc[C]) ActionBuilder[C]
+	WithFunc(method ActionFunc[C]) ActionBuilder[C]
 	Build() *Action[C]
 }
 
@@ -21,7 +21,7 @@ func (b *actionBuilder[C]) WithLabel(label string) ActionBuilder[C] {
 }
 
 // WithMethod defines action's method.
-func (b *actionBuilder[C]) WithMethod(method ActionFunc[C]) ActionBuilder[C] {
+func (b *actionBuilder[C]) WithFunc(method ActionFunc[C]) ActionBuilder[C] {
 	b.method = method
 
 	return b

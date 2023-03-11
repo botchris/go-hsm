@@ -6,7 +6,7 @@ type EntryVertexBuilder[C any] interface {
 	ParentOf(parent *Vertex[C]) EntryVertexBuilder[C]
 	OnEntry(action *Action[C]) EntryVertexBuilder[C]
 	OnExit(action *Action[C]) EntryVertexBuilder[C]
-	AddTransitions(transitions ...*Transition[C]) EntryVertexBuilder[C]
+	WithTransitions(transitions ...*Transition[C]) EntryVertexBuilder[C]
 	Build() *Vertex[C]
 }
 
@@ -46,8 +46,8 @@ func (b *entryVertexBuilder[C]) OnExit(action *Action[C]) EntryVertexBuilder[C] 
 	return b
 }
 
-// AddTransitions registers the given transitions starting from this vertex.
-func (b *entryVertexBuilder[C]) AddTransitions(transitions ...*Transition[C]) EntryVertexBuilder[C] {
+// WithTransitions registers the given transitions starting from this vertex.
+func (b *entryVertexBuilder[C]) WithTransitions(transitions ...*Transition[C]) EntryVertexBuilder[C] {
 	for _, t := range transitions {
 		b.edges.add(t)
 	}

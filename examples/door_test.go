@@ -88,7 +88,7 @@ var openState = hsm.NewState[*doorContext]().
 	OnEntry(
 		hsm.NewAction[*doorContext]().
 			WithLabel("log(entering open)").
-			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *doorContext, signal hsm.Signal) error {
 				ctx.logs = append(ctx.logs, fmt.Sprintf("entering OPEN state"))
 
 				return nil
@@ -97,13 +97,13 @@ var openState = hsm.NewState[*doorContext]().
 	OnExit(
 		hsm.NewAction[*doorContext]().
 			WithLabel("log(exiting open)").
-			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *doorContext, signal hsm.Signal) error {
 				ctx.logs = append(ctx.logs, fmt.Sprint("exiting OPEN state"))
 
 				return nil
 			}).
 			Build()).
-	AddTransitions(
+	WithTransitions(
 		// open -handle-> closed
 		hsm.NewTransition[*doorContext]().
 			When(&handleSignal{}).
@@ -118,7 +118,7 @@ var closedState = hsm.NewState[*doorContext]().
 	OnEntry(
 		hsm.NewAction[*doorContext]().
 			WithLabel("log(entering close)").
-			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *doorContext, signal hsm.Signal) error {
 				ctx.logs = append(ctx.logs, fmt.Sprint("entering CLOSED state"))
 
 				return nil
@@ -128,14 +128,14 @@ var closedState = hsm.NewState[*doorContext]().
 	OnExit(
 		hsm.NewAction[*doorContext]().
 			WithLabel("log(exiting close)").
-			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *doorContext, signal hsm.Signal) error {
 				ctx.logs = append(ctx.logs, fmt.Sprint("exiting CLOSED state"))
 
 				return nil
 			}).
 			Build(),
 	).
-	AddTransitions(
+	WithTransitions(
 		// closed -handle-> open
 		hsm.NewTransition[*doorContext]().
 			When(&handleSignal{}).
@@ -153,7 +153,7 @@ var lockedState = hsm.NewState[*doorContext]().
 	WithID(lockedID).
 	OnEntry(hsm.NewAction[*doorContext]().
 		WithLabel("log(entering locked)").
-		WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+		WithFunc(func(ctx *doorContext, signal hsm.Signal) error {
 			ctx.logs = append(ctx.logs, fmt.Sprint("entering LOCKED state"))
 
 			return nil
@@ -163,14 +163,14 @@ var lockedState = hsm.NewState[*doorContext]().
 	OnExit(
 		hsm.NewAction[*doorContext]().
 			WithLabel("log(exiting locked)").
-			WithMethod(func(ctx *doorContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *doorContext, signal hsm.Signal) error {
 				ctx.logs = append(ctx.logs, fmt.Sprint("exiting LOCKED state"))
 
 				return nil
 			}).
 			Build(),
 	).
-	AddTransitions(
+	WithTransitions(
 		// locked -handle-> closed
 		hsm.NewTransition[*doorContext]().
 			When(&keysSignal{}).

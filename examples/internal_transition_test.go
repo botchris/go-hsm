@@ -55,7 +55,7 @@ type (
 // MACHINE PARTS
 var dummyStateOne = hsm.NewState[*dummyCtx]().
 	WithID("dummy1").
-	AddTransitions(
+	WithTransitions(
 		hsm.NewInternalTransition[*dummyCtx]().
 			When(&dummySignalOne{}).
 			ApplyEffect(
@@ -70,7 +70,7 @@ var dummyStateOne = hsm.NewState[*dummyCtx]().
 			).
 			Build(),
 	).
-	AddTransitions(
+	WithTransitions(
 		hsm.NewTransition[*dummyCtx]().
 			When(&dummySignalTwo{}).
 			GoTo("dummy2").

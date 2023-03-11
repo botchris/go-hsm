@@ -68,14 +68,14 @@ var s = hsm.NewState[*orderContext]().
 	OnExit(
 		hsm.NewAction[*orderContext]().
 			WithLabel("f()").
-			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *orderContext, signal hsm.Signal) error {
 				ctx.calls = append(ctx.calls, "f()")
 
 				return nil
 			}).
 			Build(),
 	).
-	AddTransitions(
+	WithTransitions(
 		hsm.NewTransition[*orderContext]().
 			When(&wSignal{}).
 			GoTo("w").
@@ -89,13 +89,13 @@ var s1 = hsm.NewState[*orderContext]().
 	OnExit(
 		hsm.NewAction[*orderContext]().
 			WithLabel("b()").
-			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *orderContext, signal hsm.Signal) error {
 				ctx.calls = append(ctx.calls, "b()")
 				return nil
 			}).
 			Build(),
 	).
-	AddTransitions(
+	WithTransitions(
 		hsm.NewTransition[*orderContext]().
 			When(&tSignal{}).
 			GuardedBy(gGuard).
@@ -111,7 +111,7 @@ var s11 = hsm.NewState[*orderContext]().
 	OnExit(
 		hsm.NewAction[*orderContext]().
 			WithLabel("a()").
-			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *orderContext, signal hsm.Signal) error {
 				ctx.calls = append(ctx.calls, "a()")
 
 				return nil
@@ -127,7 +127,7 @@ var s2 = hsm.NewState[*orderContext]().
 	OnEntry(
 		hsm.NewAction[*orderContext]().
 			WithLabel("c()").
-			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *orderContext, signal hsm.Signal) error {
 				ctx.calls = append(ctx.calls, "c()")
 
 				return nil
@@ -138,7 +138,7 @@ var s2 = hsm.NewState[*orderContext]().
 
 var s2Entry = hsm.NewEntryState[*orderContext]().
 	WithID("s2 entry").
-	AddTransitions(
+	WithTransitions(
 		hsm.NewTransition[*orderContext]().
 			ApplyEffect(dEffect).
 			GoTo("s21").
@@ -152,7 +152,7 @@ var s21 = hsm.NewState[*orderContext]().
 	OnEntry(
 		hsm.NewAction[*orderContext]().
 			WithLabel("e()").
-			WithMethod(func(ctx *orderContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *orderContext, signal hsm.Signal) error {
 				ctx.calls = append(ctx.calls, "e()")
 
 				return nil

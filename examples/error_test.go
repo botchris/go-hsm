@@ -98,7 +98,7 @@ func prepareErrorMachine(context *errorContext) (*hsm.HSM[*errorContext], error)
 				OnEntry(
 					hsm.NewAction[*errorContext]().
 						WithLabel("errorsCount++").
-						WithMethod(func(ctx *errorContext, signal hsm.Signal) error {
+						WithFunc(func(ctx *errorContext, signal hsm.Signal) error {
 							ctx.errorsCount++
 
 							return nil
@@ -139,12 +139,12 @@ var stateA = hsm.NewState[*errorContext]().
 	OnExit(
 		hsm.NewAction[*errorContext]().
 			WithLabel("ctx.onExitA()").
-			WithMethod(func(ctx *errorContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *errorContext, signal hsm.Signal) error {
 				return ctx.onExitA()
 			}).
 			Build(),
 	).
-	AddTransitions(
+	WithTransitions(
 		// A -dummy_signal/dummy_fx-> B
 		hsm.NewTransition[*errorContext]().
 			When(&dummySignal{}).
@@ -166,7 +166,7 @@ var stateB = hsm.NewState[*errorContext]().
 	OnEntry(
 		hsm.NewAction[*errorContext]().
 			WithLabel("ctx.onEntryB()").
-			WithMethod(func(ctx *errorContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *errorContext, signal hsm.Signal) error {
 				return ctx.onEntryB()
 			}).
 			Build(),

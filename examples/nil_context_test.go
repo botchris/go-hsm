@@ -49,7 +49,7 @@ var (
 
 var n1 = hsm.NewState[interface{}]().
 	WithID(n1ID).
-	AddTransitions(
+	WithTransitions(
 		hsm.NewTransition[interface{}]().
 			When(&nSignal{}).
 			GoTo(n2ID).

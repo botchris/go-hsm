@@ -72,7 +72,7 @@ var start = hsm.NewStart[*lobbyContext]().
 
 var awaiting = hsm.NewState[*lobbyContext]().
 	WithID(awaitingID).
-	AddTransitions(
+	WithTransitions(
 		// awaiting -join-> <<start choice>>
 		hsm.NewTransition[*lobbyContext]().
 			When(&playerJoined{}).

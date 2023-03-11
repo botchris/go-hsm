@@ -20,9 +20,11 @@ func TestOven(t *testing.T) {
 	require.NotNil(t, machine)
 
 	assert.NoError(t, machine.Signal(&doorClosed{}))
-	assert.NotNil(t, context.lamp, "lamp should be off while heating")
+	assert.False(t, context.lamp, "lamp should be off while heating")
+
 	assert.NoError(t, machine.Signal(&doBaking{temp: 120}))
 	assert.Equal(t, 120, context.temperature, "baking temp should be 120")
+
 	assert.False(t, machine.Failed())
 	assert.NotEmpty(t, hsm.NewPlantUMLPrinter[*ovenContext]().Print(machine))
 }
@@ -39,7 +41,7 @@ func prepareOvenMachine(context *ovenContext) (*hsm.HSM[*ovenContext], error) {
 				OnEntry(
 					hsm.NewAction[*ovenContext]().
 						WithLabel("log()").
-						WithMethod(func(ctx *ovenContext, signal hsm.Signal) error {
+						WithFunc(func(ctx *ovenContext, signal hsm.Signal) error {
 							spew.Dump(signal)
 
 							return nil
@@ -86,7 +88,7 @@ var (
 // MACHINE PARTS
 var heatingEntry = hsm.NewEntryState[*ovenContext]().
 	WithID(heatingEntryID).
-	AddTransitions(
+	WithTransitions(
 		hsm.NewTransition[*ovenContext]().
 			GoTo(toastingID).
 			Build(),
@@ -96,7 +98,7 @@ var heatingEntry = hsm.NewEntryState[*ovenContext]().
 var heating = hsm.NewState[*ovenContext]().
 	WithID(heatingID).
 	WithEntryState(heatingEntry).
-	AddTransitions(
+	WithTransitions(
 		// heating -doorOpened-> door_open
 		hsm.NewTransition[*ovenContext]().
 			When(&doorOpened{}).
@@ -121,7 +123,7 @@ var toasting = hsm.NewState[*ovenContext]().
 	OnEntry(
 		hsm.NewAction[*ovenContext]().
 			WithLabel("arm_time_event(oven.toastColor)").
-			WithMethod(func(ctx *ovenContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *ovenContext, signal hsm.Signal) error {
 				return nil
 			}).
 			Build(),
@@ -129,7 +131,7 @@ var toasting = hsm.NewState[*ovenContext]().
 	OnExit(
 		hsm.NewAction[*ovenContext]().
 			WithLabel("disarm_time_event()").
-			WithMethod(func(ctx *ovenContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *ovenContext, signal hsm.Signal) error {
 				return nil
 			}).
 			Build()).
@@ -141,18 +143,19 @@ var baking = hsm.NewState[*ovenContext]().
 	OnEntry(
 		hsm.NewAction[*ovenContext]().
 			WithLabel("set_temperature(signal.temp)").
-			WithMethod(func(ctx *ovenContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *ovenContext, signal hsm.Signal) error {
 				if s, ok := signal.(*doBaking); ok {
 					ctx.temperature = s.temp
 				}
 
 				return nil
 			}).
-			Build()).
+			Build(),
+	).
 	OnExit(
 		hsm.NewAction[*ovenContext]().
 			WithLabel("set_temperature(0)").
-			WithMethod(func(ctx *ovenContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *ovenContext, signal hsm.Signal) error {
 				return nil
 			}).
 			Build(),
@@ -164,7 +167,7 @@ var doorOpen = hsm.NewState[*ovenContext]().
 	OnEntry(
 		hsm.NewAction[*ovenContext]().
 			WithLabel("lamp_on()").
-			WithMethod(func(ctx *ovenContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *ovenContext, signal hsm.Signal) error {
 				ctx.lamp = true
 
 				return nil
@@ -174,14 +177,14 @@ var doorOpen = hsm.NewState[*ovenContext]().
 	OnExit(
 		hsm.NewAction[*ovenContext]().
 			WithLabel("lamp_off()").
-			WithMethod(func(ctx *ovenContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *ovenContext, signal hsm.Signal) error {
 				ctx.lamp = false
 
 				return nil
 			}).
 			Build(),
 	).
-	AddTransitions(
+	WithTransitions(
 		// door_open -doorClosed-> heating
 		hsm.NewTransition[*ovenContext]().
 			When(&doorClosed{}).

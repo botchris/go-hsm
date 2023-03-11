@@ -51,7 +51,7 @@ var (
 // MACHINE PARTS.
 var aState = hsm.NewState[*mutexContext]().
 	WithID(aID).
-	AddTransitions(
+	WithTransitions(
 		// open -handle-> closed
 		hsm.NewTransition[*mutexContext]().
 			When(&tSignal{}).
@@ -65,7 +65,7 @@ var bState = hsm.NewState[*mutexContext]().
 	OnEntry(
 		hsm.NewAction[*mutexContext]().
 			WithLabel("read(hsm.currentState)").
-			WithMethod(func(ctx *mutexContext, signal hsm.Signal) error {
+			WithFunc(func(ctx *mutexContext, signal hsm.Signal) error {
 				ctx.hsm.Current()
 				ctx.hsm.At(aState)
 				ctx.hsm.Finished()

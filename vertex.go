@@ -14,7 +14,7 @@ const (
 // vertexKind private definition of vertex kind types.
 type vertexKind int
 
-// Vertex is named element which is an abstraction of a node in a state machine graph. In general, it can
+// Vertex is an abstraction of a node in a state machine graph. In general, it can
 // be the source or destination of any number of transitions.
 //
 // Subclasses of vertex are:
