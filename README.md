@@ -4,25 +4,25 @@ HSM package provides a simple state chart library written in Go.
 
 ## Supported UML State Chart Features
 
-| Feature              | Implemented | Test case             |
-| -------------------- |:-----------:| ----------------------|
-| Simple state         | Yes         | door_test             |
-| Composite states     | Yes         | nesting_test          |
-| Sub machines         | No          |                       |
-| Compound transition  | No          |                       |
-| Fork                 | No          |                       |
-| Join                 | No          |                       |
-| Guards/Actions       | Yes         | lobby_test + various  |
-| Shallow/Deep history | No          |                       | 
-| Exit/Entry points    | Yes         | error_test + various  |
-| Init/Final           | Yes         | various               |
-| Event deferral       | No          |                       |
-| Terminate            | No          |                       |
-| Choice               | Yes         | choice_test           |
-| Junction             | No          |                       |
-| Do activity          | No          |                       |
-| Connection point ref | No          |                       |
-| Protocol Machines    | No          |                       |
+| Feature              | Implemented | Test case            |
+|----------------------|:-----------:|----------------------|
+| Simple state         |     Yes     | door_test            |
+| Composite states     |     Yes     | nesting_test         |
+| Sub machines         |     No      |                      |
+| Compound transition  |     No      |                      |
+| Fork                 |     No      |                      |
+| Join                 |     No      |                      |
+| Guards/Actions       |     Yes     | lobby_test + various |
+| Shallow/Deep history |     No      |                      | 
+| Exit/Entry points    |     Yes     | error_test + various |
+| Init/Final           |     Yes     | various              |
+| Event deferral       |     No      |                      |
+| Terminate            |     No      |                      |
+| Choice               |     Yes     | choice_test          |
+| Junction             |     No      |                      |
+| Do activity          |     No      |                      |
+| Connection point ref |     No      |                      |
+| Protocol Machines    |     No      |                      |
 
 ## Introduction
 
@@ -90,7 +90,7 @@ transitions, are triggered implicitly when its source state has completed its ac
 Transition guard conditions are evaluated after the signal for the transition occurs. It is possible to have multiple
 transitions from the same source state and with the same signal trigger, as long as the guard conditions don't overlap.
 A guard condition is evaluated just once for the transition at the time the signal occurs. The boolean MUST be
-side-effect free, at least none that would alter evaluation of other guards having the same trigger.
+side effect free, at least none that would alter evaluation of other guards having the same trigger.
 
 ### Effects
 

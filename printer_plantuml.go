@@ -15,39 +15,41 @@ import (
 // printer := hsm.NewPlantUMLPrinter()
 // out := printer.Print(MyMachine)
 // println(string(out))
-// ```
-type PlantUMLPrinter struct {
-	machine   *HSM
+// ```.
+type PlantUMLPrinter[C any] struct {
+	machine   *HSM[C]
 	ids       map[string]uint32
-	allStates []*Vertex
+	allStates []*Vertex[C]
 }
 
-// NewPlantUMLPrinter returns a new printer
-func NewPlantUMLPrinter() Printer {
-	return &PlantUMLPrinter{
+// NewPlantUMLPrinter returns a new printer.
+func NewPlantUMLPrinter[C any]() Printer[C] {
+	return &PlantUMLPrinter[C]{
 		ids: make(map[string]uint32),
 	}
 }
 
-// Print prints the given HSM
-func (p *PlantUMLPrinter) Print(hsm *HSM) []byte {
+// Print prints the given HSM.
+func (p *PlantUMLPrinter[C]) Print(hsm *HSM[C]) []byte {
 	p.init(hsm)
 
 	return []byte(p.print())
 }
 
-func (p *PlantUMLPrinter) init(hsm *HSM) *PlantUMLPrinter {
+func (p *PlantUMLPrinter[C]) init(hsm *HSM[C]) *PlantUMLPrinter[C] {
 	p.machine = hsm
 	for _, s := range p.machine.states {
 		p.ids[s.id] = p.fNV32a(s.id)
 	}
 
-	var merge = []*Vertex{p.machine.errorState}
-	var choice []*Vertex
-	var entry []*Vertex
-	var start []*Vertex
-	var final []*Vertex
-	var state []*Vertex
+	var (
+		merge  = []*Vertex[C]{p.machine.errorState}
+		choice []*Vertex[C]
+		entry  []*Vertex[C]
+		start  []*Vertex[C]
+		final  []*Vertex[C]
+		state  []*Vertex[C]
+	)
 
 	for _, v := range p.machine.states {
 		switch v.kind {
@@ -77,10 +79,12 @@ func (p *PlantUMLPrinter) init(hsm *HSM) *PlantUMLPrinter {
 	return p
 }
 
-func (p *PlantUMLPrinter) print() string {
-	var out = ""
-	var caption = fmt.Sprintf("caption HSM %s@%s\n", p.machine.name, p.machine.Current().id)
-	var roots []*Vertex
+func (p *PlantUMLPrinter[C]) print() string {
+	var (
+		out     = ""
+		caption = fmt.Sprintf("caption HSM %s@%s\n", p.machine.name, p.machine.Current().id)
+		roots   []*Vertex[C]
+	)
 
 	for _, v := range p.allStates {
 		if v.parent == nil {
@@ -107,7 +111,7 @@ func (p *PlantUMLPrinter) print() string {
 	return fmt.Sprintf(template, caption, out, final)
 }
 
-func (p *PlantUMLPrinter) renderVertex(v *Vertex) string {
+func (p *PlantUMLPrinter[C]) renderVertex(v *Vertex[C]) string {
 	content := ""
 	children := p.children(v)
 	alias := p.alias(v)
@@ -115,7 +119,7 @@ func (p *PlantUMLPrinter) renderVertex(v *Vertex) string {
 
 	switch v.kind {
 	case vertexKindError:
-		template = fmt.Sprintf("state \"%s\" as %s #Red\n", v.id, alias)
+		template = fmt.Sprintf("state %q as %s #Red\n", v.id, alias)
 		template += "%s"
 	case vertexKindChoice:
 		template = fmt.Sprintf("state %s <<choice>>\n", alias)
@@ -127,7 +131,7 @@ func (p *PlantUMLPrinter) renderVertex(v *Vertex) string {
 	case vertexKindFinal:
 		template = "%s\n"
 	case vertexKindState:
-		template = fmt.Sprintf("state \"%s\" as %s {\n", v.id, alias)
+		template = fmt.Sprintf("state %q as %s {\n", v.id, alias)
 		template += "%s\n"
 		template += "}\n"
 	default:
@@ -135,11 +139,11 @@ func (p *PlantUMLPrinter) renderVertex(v *Vertex) string {
 	}
 
 	if v.onEntry != nil {
-		content += fmt.Sprintf("%s : entry / %s\n", alias, v.onEntry.label)
+		content += fmt.Sprintf("%s : entry / %s\n", alias, v.onEntry)
 	}
 
 	if v.onExit != nil {
-		content += fmt.Sprintf("%s : exit / %s\n", alias, v.onExit.label)
+		content += fmt.Sprintf("%s : exit / %s\n", alias, v.onExit)
 	}
 
 	for _, t := range v.edges.list() {
@@ -155,22 +159,26 @@ func (p *PlantUMLPrinter) renderVertex(v *Vertex) string {
 	return fmt.Sprintf(template, content)
 }
 
-func (p *PlantUMLPrinter) renderTransitionFor(v *Vertex, t *Transition) string {
-	var out = ""
-	var currentState = p.machine.Current()
-	var green bool
-	var from = p.alias(v)
-	var to = p.alias(t.nextStatePtr)
+func (p *PlantUMLPrinter[C]) renderTransitionFor(v *Vertex[C], t *Transition[C]) string {
+	var (
+		out          = ""
+		currentState = p.machine.Current()
+		green        bool
+		from         = p.alias(v)
+		to           = p.alias(t.nextStatePtr)
+	)
 
 	if from == "" && to == "" {
 		return out
 	}
 
 	label := p.renderTransitionLabelFor(v, t)
+
 	for _, possible := range currentState.edges.list() {
 		if possible == t {
 			if possible.guard == nil || possible.guard.method(p.machine.context) {
 				green = true
+
 				break
 			}
 		}
@@ -203,7 +211,7 @@ func (p *PlantUMLPrinter) renderTransitionFor(v *Vertex, t *Transition) string {
 	return out
 }
 
-func (p *PlantUMLPrinter) renderTransitionLabelFor(from *Vertex, t *Transition) string {
+func (p *PlantUMLPrinter[C]) renderTransitionLabelFor(from *Vertex[C], t *Transition[C]) string {
 	trigger := strings.Replace(p.machine.kind(t.signal), "*", "", 1)
 	guard := ""
 	effect := ""
@@ -227,7 +235,7 @@ func (p *PlantUMLPrinter) renderTransitionLabelFor(from *Vertex, t *Transition) 
 	return strings.TrimSpace(strings.Join([]string{trigger, guard, effect}, " "))
 }
 
-func (p *PlantUMLPrinter) alias(v *Vertex) string {
+func (p *PlantUMLPrinter[C]) alias(v *Vertex[C]) string {
 	switch v.kind {
 	case vertexKindEntry:
 		return "[*]"
@@ -244,8 +252,8 @@ func (p *PlantUMLPrinter) alias(v *Vertex) string {
 	return fmt.Sprintf("state_%d", p.ids[v.id])
 }
 
-func (p *PlantUMLPrinter) children(v *Vertex) []*Vertex {
-	var children []*Vertex
+func (p *PlantUMLPrinter[C]) children(v *Vertex[C]) []*Vertex[C] {
+	var children []*Vertex[C]
 
 	for _, s := range p.allStates {
 		if s.parent != nil && s.parent == v {
@@ -256,7 +264,7 @@ func (p *PlantUMLPrinter) children(v *Vertex) []*Vertex {
 	return children
 }
 
-func (p *PlantUMLPrinter) fNV32a(text string) uint32 {
+func (p *PlantUMLPrinter[C]) fNV32a(text string) uint32 {
 	algorithm := fnv.New32a()
 	_, _ = algorithm.Write([]byte(text))
 

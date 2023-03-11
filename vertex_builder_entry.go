@@ -1,53 +1,53 @@
 package hsm
 
-// EntryVertexBuilder builder
-type EntryVertexBuilder interface {
-	WithID(id string) EntryVertexBuilder
-	ParentOf(parent *Vertex) EntryVertexBuilder
-	OnEntry(action *Action) EntryVertexBuilder
-	OnExit(action *Action) EntryVertexBuilder
-	AddTransitions(transitions ...*Transition) EntryVertexBuilder
-	Build() *Vertex
+// EntryVertexBuilder builder.
+type EntryVertexBuilder[C any] interface {
+	WithID(id string) EntryVertexBuilder[C]
+	ParentOf(parent *Vertex[C]) EntryVertexBuilder[C]
+	OnEntry(action *Action[C]) EntryVertexBuilder[C]
+	OnExit(action *Action[C]) EntryVertexBuilder[C]
+	AddTransitions(transitions ...*Transition[C]) EntryVertexBuilder[C]
+	Build() *Vertex[C]
 }
 
-type entryVertexBuilder struct {
+type entryVertexBuilder[C any] struct {
 	id      string
-	parent  *Vertex
-	onEntry *Action
-	onExit  *Action
-	edges   *edgesCollection
+	parent  *Vertex[C]
+	onEntry *Action[C]
+	onExit  *Action[C]
+	edges   *edgesCollection[C]
 }
 
-// WithID defines vertex's identity, must be unique within the entire HSM
-func (b *entryVertexBuilder) WithID(id string) EntryVertexBuilder {
+// WithID defines vertex's identity, must be unique within the entire HSM.
+func (b *entryVertexBuilder[C]) WithID(id string) EntryVertexBuilder[C] {
 	b.id = id
 
 	return b
 }
 
-// ParentOf indicates vertex's parent
-func (b *entryVertexBuilder) ParentOf(parent *Vertex) EntryVertexBuilder {
+// ParentOf indicates vertex's parent.
+func (b *entryVertexBuilder[C]) ParentOf(parent *Vertex[C]) EntryVertexBuilder[C] {
 	b.parent = parent
 
 	return b
 }
 
-// OnEntry defines vertex's entry action
-func (b *entryVertexBuilder) OnEntry(action *Action) EntryVertexBuilder {
+// OnEntry defines vertex's entry action.
+func (b *entryVertexBuilder[C]) OnEntry(action *Action[C]) EntryVertexBuilder[C] {
 	b.onEntry = action
 
 	return b
 }
 
-// OnExit defines vertex's exit action
-func (b *entryVertexBuilder) OnExit(action *Action) EntryVertexBuilder {
+// OnExit defines vertex's exit action.
+func (b *entryVertexBuilder[C]) OnExit(action *Action[C]) EntryVertexBuilder[C] {
 	b.onExit = action
 
 	return b
 }
 
-// AddTransitions registers the given transitions starting from this vertex
-func (b *entryVertexBuilder) AddTransitions(transitions ...*Transition) EntryVertexBuilder {
+// AddTransitions registers the given transitions starting from this vertex.
+func (b *entryVertexBuilder[C]) AddTransitions(transitions ...*Transition[C]) EntryVertexBuilder[C] {
 	for _, t := range transitions {
 		b.edges.add(t)
 	}
@@ -55,9 +55,9 @@ func (b *entryVertexBuilder) AddTransitions(transitions ...*Transition) EntryVer
 	return b
 }
 
-// Build returns a vertex instance
-func (b *entryVertexBuilder) Build() *Vertex {
-	vertex := &Vertex{
+// Build returns a vertex instance.
+func (b *entryVertexBuilder[C]) Build() *Vertex[C] {
+	vertex := &Vertex[C]{
 		id:      b.id,
 		kind:    vertexKindEntry,
 		parent:  b.parent,

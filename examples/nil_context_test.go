@@ -19,16 +19,16 @@ func TestNilContext(t *testing.T) {
 
 	assert.NoError(t, machine.Signal(&nSignal{}))
 	assert.False(t, machine.Failed())
-	assert.NotEmpty(t, hsm.NewPlantUMLPrinter().Print(machine))
+	assert.NotEmpty(t, hsm.NewPlantUMLPrinter[interface{}]().Print(machine))
 }
 
-func prepareNilMachine(context interface{}) (*hsm.HSM, error) {
-	return hsm.NewBuilder().
+func prepareNilMachine(context interface{}) (*hsm.HSM[interface{}], error) {
+	return hsm.NewBuilder[interface{}]().
 		// meta
 		WithName("nil").
 		WithContext(context).
 		StartingAt(n1).
-		WithErrorState(hsm.NewErrorState().WithID("error").Build()).
+		WithErrorState(hsm.NewErrorState[interface{}]().WithID("error").Build()).
 
 		// states
 		AddState(n1).
@@ -47,16 +47,16 @@ var (
 	n2ID = "n2"
 )
 
-var n1 = hsm.NewState().
+var n1 = hsm.NewState[interface{}]().
 	WithID(n1ID).
 	AddTransitions(
-		hsm.NewTransition().
+		hsm.NewTransition[interface{}]().
 			When(&nSignal{}).
 			GoTo(n2ID).
 			Build(),
 	).
 	Build()
 
-var n2 = hsm.NewState().
+var n2 = hsm.NewState[interface{}]().
 	WithID(n2ID).
 	Build()
