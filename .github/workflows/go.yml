@@ -23,7 +23,7 @@ jobs:
         cache-dependency-path: go.sum
 
     - name: Install golangci-lint
-      run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.51.0
+      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.0
 
     - name: Test & Lint
       run: |
