@@ -11,11 +11,9 @@ import (
 //
 // Usage:
 //
-// ```go
-// printer := hsm.NewPlantUMLPrinter()
-// out := printer.Print(MyMachine)
-// println(string(out))
-// ```.
+//	printer := hsm.NewPlantUMLPrinter()
+//	out := printer.Print(MyMachine)
+//	println(string(out))
 type PlantUMLPrinter[C any] struct {
 	machine   *HSM[C]
 	ids       map[string]uint32

@@ -14,7 +14,7 @@ func TestDoor(t *testing.T) {
 		context := &doorContext{}
 		machine, err := prepareDoorMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*doorContext]().Print(machine)))
 
 		require.NoError(t, err)
 		require.True(t, machine.Can(&handleSignal{}))
@@ -38,7 +38,7 @@ func TestDoor(t *testing.T) {
 		context := &doorContext{}
 		machine, err := prepareDoorMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*doorContext]().Print(machine)))
 
 		require.NoError(t, err)
 		assert.Error(t, machine.Signal(&keysSignal{}))

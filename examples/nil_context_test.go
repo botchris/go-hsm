@@ -12,7 +12,7 @@ import (
 func TestNilContext(t *testing.T) {
 	machine, err := prepareNilMachine(nil)
 
-	//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+	//println(string(hsm.NewPlantUMLPrinter[interface{}]().Print(machine)))
 
 	require.NoError(t, err)
 	require.NotNil(t, machine)

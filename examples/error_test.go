@@ -24,7 +24,7 @@ func TestError(t *testing.T) {
 		}
 		machine, err := prepareErrorMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*errorContext]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)
@@ -49,7 +49,7 @@ func TestError(t *testing.T) {
 		}
 		machine, err := prepareErrorMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*errorContext]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)
@@ -74,7 +74,7 @@ func TestError(t *testing.T) {
 		}
 		machine, err := prepareErrorMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*errorContext]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)

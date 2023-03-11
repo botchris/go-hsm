@@ -14,7 +14,7 @@ func TestInvocationOrder(t *testing.T) {
 	context := &orderContext{}
 	machine, err := prepareOrderMachine(context)
 
-	//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+	//println(string(hsm.NewPlantUMLPrinter[*orderContext]().Print(machine)))
 
 	require.NoError(t, err)
 	require.NotNil(t, machine)

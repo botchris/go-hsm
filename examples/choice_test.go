@@ -15,7 +15,7 @@ func TestChoicePseudoState(t *testing.T) {
 		}
 		machine, err := prepareChoiceMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*choiceCtx]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)
@@ -31,7 +31,7 @@ func TestChoicePseudoState(t *testing.T) {
 		}
 		machine, err := prepareChoiceMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*choiceCtx]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)
@@ -47,7 +47,7 @@ func TestChoicePseudoState(t *testing.T) {
 		}
 		machine, err := prepareChoiceMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*choiceCtx]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)
@@ -61,7 +61,7 @@ func TestChoicePseudoState(t *testing.T) {
 		context := &choiceCtx{}
 		machine, err := prepareChoiceMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*choiceCtx]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)
@@ -79,7 +79,7 @@ func TestChoicePseudoState(t *testing.T) {
 		}
 		machine, err := prepareChoiceMachine(context)
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*choiceCtx]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)

@@ -14,6 +14,8 @@ func TestOven(t *testing.T) {
 	context := &ovenContext{}
 	machine, err := prepareOvenMachine(context)
 
+	//println(string(hsm.NewPlantUMLPrinter[*ovenContext]().Print(machine)))
+
 	require.NoError(t, err)
 	require.NotNil(t, machine)
 

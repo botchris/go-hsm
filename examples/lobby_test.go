@@ -12,7 +12,7 @@ func TestChoice(t *testing.T) {
 	t.Run("WHEN two players join THEN lobby must start playing", func(t *testing.T) {
 		machine, err := prepareLobbyMachine(&lobbyContext{})
 
-		//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+		//println(string(hsm.NewPlantUMLPrinter[*lobbyContext]().Print(machine)))
 
 		require.NoError(t, err)
 		require.NotNil(t, machine)

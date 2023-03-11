@@ -12,7 +12,7 @@ func TestInternalTransition(t *testing.T) {
 	context := &dummyCtx{}
 	machine, err := prepareDummyMachine(context)
 
-	//println(string(hsm.NewPlantUMLPrinter().Print(machine)))
+	//println(string(hsm.NewPlantUMLPrinter[*dummyCtx]().Print(machine)))
 
 	require.NoError(t, err)
 	require.NotNil(t, machine)
