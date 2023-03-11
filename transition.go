@@ -27,3 +27,12 @@ func NewTransition[C any]() TransitionBuilder[C] {
 func NewInternalTransition[C any]() InternalTransitionBuilder[C] {
 	return &internalTransitionBuilder[C]{}
 }
+
+type MachineTransitionBuilder[C any] interface {
+	From(state *Vertex[C]) MachineTransitionBuilder[C]
+	To(state *Vertex[C]) MachineTransitionBuilder[C]
+	When(signal Signal) MachineTransitionBuilder[C]
+	GuardedBy(guard GuardFunc[C]) MachineTransitionBuilder[C]
+	ApplyEffect(effect *Effect[C]) MachineTransitionBuilder[C]
+	Append() *Builder[C]
+}

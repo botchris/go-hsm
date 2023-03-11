@@ -98,13 +98,35 @@ func prepareChoiceMachine(context *choiceCtx) (*hsm.HSM[*choiceCtx], error) {
 		WithErrorState(hsm.NewErrorState[*choiceCtx]().WithID("error").Build()).
 
 		// states
-		AddState(c0).
-		AddState(c1).
-		AddState(c2).
-		AddState(c3).
-		AddState(c4).
-		AddState(c5).
-		AddState(final).
+		AddStates(
+			c0,
+			c1,
+			c2,
+			c3,
+			c4,
+			c5,
+			final,
+		).
+
+		// c0 -> c1
+		NewTransition().
+		From(c0).
+		To(c1).
+		Append().
+
+		// c1 -choiceSignal-> c2
+		NewTransition().
+		From(c1).
+		To(c2).
+		When(&choiceSignal{}).
+		Append().
+
+		// c2 -> c3
+		NewTransition().
+		From(c2).
+		To(c3).
+		GuardedBy(func(ctx *choiceCtx) bool { return ctx.g3 }).
+		Append().
 
 		// build
 		Build()
@@ -148,7 +170,8 @@ var c1 = hsm.NewState[*choiceCtx]().
 		hsm.NewTransition[*choiceCtx]().
 			When(&choiceSignal{}).
 			GoTo(c2ID).
-			Build()).
+			Build(),
+	).
 	Build()
 
 var c2 = hsm.NewChoice[*choiceCtx]().

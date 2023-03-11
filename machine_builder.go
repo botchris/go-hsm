@@ -65,6 +65,10 @@ func (b *Builder[C]) AddStates(states ...*Vertex[C]) *Builder[C] {
 	return b
 }
 
+func (b *Builder[C]) NewTransition() MachineTransitionBuilder[C] {
+	return nil
+}
+
 // Restore builds a new machine instance and restores from the given snapshot.
 // no guards are checked nor entry/exit logic will be executed.
 func (b *Builder[C]) Restore(snapshot Snapshot) (*HSM[C], error) {
